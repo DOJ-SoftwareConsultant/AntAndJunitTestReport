@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AlgoTest.makejar" default="makejar" basedir=".">
+	<presetdef name="javac">
+		<javac includeantruntime="false"/> 
+	</presetdef>
+  <property name="build.dir" value="build" />
+  <target name="clean" description="cleans up the build by deleting the build,dist, web directories">
+   		<delete dir="${build.dir}"/>
+   </target>
+   <target name="init" depends="clean" description="Setup for build script">   
+   		<mkdir dir="${build.dir}"/>
+   </target>
+   <target name="compile" depends="init" description="Compiles .java files to WAR directory">
+   		<mkdir dir="${build.dir}/classes"/>
+       <javac srcdir="src" destdir="${build.dir}/classes">
+       	<classpath>
+            <fileset dir="${basedir}">
+                <include name="lib/*.jar" />
+            </fileset>
+        </classpath>
+       </javac>
+     </target>    
+      <target name ="makejar" description="Create a jar for the AlgoTest project" depends="compile">
+	    <jar jarfile="${build.dir}/AlgoTest.jar" basedir="${build.dir}/classes">
+	    	<manifest>
+		      <attribute name = "Main-Class" value = "com.dineshonjava.algo.Test"/>
+		   </manifest>
+	    </jar>
+	  </target>
+	<target name="run">
+		<java jar="${build.dir}/AlgoTest.jar" fork="true"></java>
+	</target>
+	<target name = "generate-javadoc">
+		<mkdir dir="doc"/>
+		 <javadoc packagenames="com.dineshonjava.algo.*" sourcepath="src" 
+		      destdir = "doc" version = "true" windowtitle = "Algo Application">
+		 	 <doctitle><![CDATA[= Algo Application =]]></doctitle>
+	 	      <bottom>
+	 	         <![CDATA[Copyright © 2016. All Rights Reserved.]]>
+	 	      </bottom>
+	 	      <group title = "algo packages" packages = "com.dineshonjava.algo.*"/>
+		</javadoc>
+		<echo message = "java doc has been generated!" />
+	</target>
+	
+	<target name="unittest" depends="compile">
+		<mkdir dir="reports"/>
+		<mkdir dir="reports/raw"/>
+		<mkdir dir="reports/html/"/>
+	   <junit printsummary="yes" haltonfailure="yes" showoutput="yes">
+		   	<classpath>
+		   		<pathelement location="${build.dir}/classes"/>
+	            <fileset dir="${basedir}">
+	                <include name="lib/*.jar" />
+	            </fileset>
+	        </classpath>
+	         <test name="com.dineshonjava.algo.AppTestCases" todir="reports/raw"/>
+	    	<formatter type="xml"/>
+	   </junit>
+	</target>
+	
+	<target name="test-reports" depends="unittest">
+        <junitreport todir="reports">
+            <fileset dir="reports/raw/">
+                <include name="TEST-*.xml" />
+            </fileset>
+            <report format="noframes" todir="reports/html/" />
+        </junitreport>
+    </target>
+	
+</project>
